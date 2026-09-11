@@ -11,13 +11,34 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import { deleteCorridor } from "./actions";
+import { ListSearch } from "@/components/admin/list-search";
+import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
 
 export const metadata = {
   title: "Corridors & Pricing",
 };
 
-export default async function CorridorsPage() {
+export default async function CorridorsPage({ searchParams }: PageProps<"/admin/corridors">) {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const page = typeof params.page === "string" ? parseInt(params.page, 10) || 1 : 1;
+
+  const where = q
+    ? {
+        OR: [
+          { originCountry: { name: { contains: q, mode: "insensitive" as const } } },
+          { destinationCountry: { name: { contains: q, mode: "insensitive" as const } } },
+        ],
+      }
+    : undefined;
+
+  const totalCount = await prisma.corridor.count({ where });
+  const { currentPage, totalPages, skip, take } = paginationInfo(totalCount, page);
+
   const corridors = await prisma.corridor.findMany({
+    where,
+    skip,
+    take,
     include: { originCountry: true, destinationCountry: true, _count: { select: { documents: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -36,7 +57,11 @@ export default async function CorridorsPage() {
         </Button>
       </div>
 
-      <div className="mt-6 rounded-lg border">
+      <div className="mt-6">
+        <ListSearch placeholder="Search by country…" />
+      </div>
+
+      <div className="mt-4 rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -74,13 +99,15 @@ export default async function CorridorsPage() {
             {corridors.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  No corridors yet.
+                  {q ? `No corridors match "${q}".` : "No corridors yet."}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      <ListPagination currentPage={currentPage} totalPages={totalPages} searchParams={params} />
     </div>
   );
 }

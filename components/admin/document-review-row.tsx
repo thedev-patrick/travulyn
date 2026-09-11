@@ -1,18 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Clock, FileText, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { reviewDocument } from "@/app/admin/(protected)/customers/[id]/applications/actions";
-
-const statusMeta: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: typeof Clock }> = {
-  PENDING: { label: "Pending", variant: "outline", icon: Clock },
-  UPLOADED: { label: "Uploaded", variant: "default", icon: FileText },
-  APPROVED: { label: "Approved", variant: "secondary", icon: CheckCircle2 },
-  REJECTED: { label: "Rejected", variant: "destructive", icon: XCircle },
-};
+import { DocumentStatusBadge } from "@/components/status-badge";
+import type { DocumentStatus } from "@/lib/generated/prisma/enums";
 
 export function DocumentReviewRow({
   applicationId,
@@ -21,15 +15,13 @@ export function DocumentReviewRow({
   applicationId: string;
   document: {
     id: string;
-    status: string;
+    status: DocumentStatus;
     fileUrl: string | null;
     rejectionReason: string | null;
     requiredDocument: { name: string; description: string | null };
   };
 }) {
   const [showReject, setShowReject] = useState(false);
-  const meta = statusMeta[document.status];
-  const Icon = meta.icon;
 
   return (
     <div className="rounded-lg border p-4">
@@ -53,9 +45,7 @@ export function DocumentReviewRow({
             <p className="mt-1 text-xs text-destructive">Reason: {document.rejectionReason}</p>
           )}
         </div>
-        <Badge variant={meta.variant}>
-          <Icon className="h-3 w-3" /> {meta.label}
-        </Badge>
+        <DocumentStatusBadge status={document.status} />
       </div>
 
       {document.status === "UPLOADED" && (

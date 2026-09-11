@@ -1,23 +1,14 @@
 import { notFound } from "next/navigation";
-import { CheckCircle2, Clock3, FileCheck, ShieldCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getApplicationByToken } from "@/lib/queries";
 import { DocumentUploadRow } from "@/components/portal/document-upload-row";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { ProgressBar } from "@/components/portal/progress-bar";
+import { ApplicationStatusBadge } from "@/components/status-badge";
 
 export const metadata = {
   title: "Your Application",
-};
-
-const statusMeta: Record<string, { label: string; icon: typeof Clock3 }> = {
-  ONBOARDED: { label: "Getting started", icon: Clock3 },
-  DOCS_PENDING: { label: "Documents pending", icon: FileCheck },
-  IN_REVIEW: { label: "In review", icon: ShieldCheck },
-  APPROVED: { label: "Approved", icon: CheckCircle2 },
-  COMPLETED: { label: "Completed", icon: CheckCircle2 },
 };
 
 export default async function CustomerPortalPage({ params }: PageProps<"/portal/[token]">) {
@@ -29,8 +20,6 @@ export default async function CustomerPortalPage({ params }: PageProps<"/portal/
   const total = application.documents.length;
   const approved = application.documents.filter((d) => d.status === "APPROVED").length;
   const progress = total > 0 ? Math.round((approved / total) * 100) : 0;
-  const meta = statusMeta[application.status];
-  const StatusIcon = meta.icon;
 
   return (
     <div className="grid gap-6">
@@ -42,9 +31,7 @@ export default async function CustomerPortalPage({ params }: PageProps<"/portal/
           {application.originCountry.flagEmoji} {application.originCountry.name} →{" "}
           {application.destinationCountry.flagEmoji} {application.destinationCountry.name}
         </p>
-        <Badge className="mt-3 gap-1.5">
-          <StatusIcon className="h-3 w-3" /> {meta.label}
-        </Badge>
+        <ApplicationStatusBadge status={application.status} className="mt-3" />
       </Reveal>
 
       <Reveal delay={0.05}>

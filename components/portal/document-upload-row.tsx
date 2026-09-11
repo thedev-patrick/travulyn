@@ -1,20 +1,20 @@
 "use client";
 
 import { useActionState } from "react";
-import { CheckCircle2, Clock, FileText, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { uploadCustomerDocument, type UploadState } from "@/app/portal/[token]/actions";
-
-const statusMeta: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: typeof Clock }> = {
-  PENDING: { label: "Needed", variant: "outline", icon: Clock },
-  UPLOADED: { label: "Under review", variant: "default", icon: FileText },
-  APPROVED: { label: "Approved", variant: "secondary", icon: CheckCircle2 },
-  REJECTED: { label: "Needs re-upload", variant: "destructive", icon: XCircle },
-};
+import { DocumentStatusBadge } from "@/components/status-badge";
+import type { DocumentStatus } from "@/lib/generated/prisma/enums";
 
 const initialState: UploadState = { status: "idle" };
+
+const customerFacingLabel: Record<DocumentStatus, string> = {
+  PENDING: "Needed",
+  UPLOADED: "Under review",
+  APPROVED: "Approved",
+  REJECTED: "Needs re-upload",
+};
 
 export function DocumentUploadRow({
   token,
@@ -23,14 +23,12 @@ export function DocumentUploadRow({
   token: string;
   document: {
     id: string;
-    status: string;
+    status: DocumentStatus;
     rejectionReason: string | null;
     requiredDocument: { name: string; description: string | null };
   };
 }) {
   const [state, formAction, pending] = useActionState(uploadCustomerDocument, initialState);
-  const meta = statusMeta[document.status];
-  const Icon = meta.icon;
   const canUpload = document.status === "PENDING" || document.status === "REJECTED";
 
   return (
@@ -45,9 +43,7 @@ export function DocumentUploadRow({
             <p className="mt-1 text-xs text-destructive">{document.rejectionReason}</p>
           )}
         </div>
-        <Badge variant={meta.variant}>
-          <Icon className="h-3 w-3" /> {meta.label}
-        </Badge>
+        <DocumentStatusBadge status={document.status} label={customerFacingLabel[document.status]} />
       </div>
 
       {canUpload && (

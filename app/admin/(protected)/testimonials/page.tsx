@@ -5,13 +5,36 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { deleteTestimonial } from "./actions";
+import { ListSearch } from "@/components/admin/list-search";
+import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
 
 export const metadata = {
   title: "Testimonials",
 };
 
-export default async function AdminTestimonialsPage() {
-  const testimonials = await prisma.testimonial.findMany({ orderBy: { createdAt: "desc" } });
+export default async function AdminTestimonialsPage({ searchParams }: PageProps<"/admin/testimonials">) {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const page = typeof params.page === "string" ? parseInt(params.page, 10) || 1 : 1;
+
+  const where = q
+    ? {
+        OR: [
+          { customerName: { contains: q, mode: "insensitive" as const } },
+          { quote: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : undefined;
+
+  const totalCount = await prisma.testimonial.count({ where });
+  const { currentPage, totalPages, skip, take } = paginationInfo(totalCount, page);
+
+  const testimonials = await prisma.testimonial.findMany({
+    where,
+    skip,
+    take,
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div>
@@ -25,7 +48,11 @@ export default async function AdminTestimonialsPage() {
         </Button>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6">
+        <ListSearch placeholder="Search testimonials…" />
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {testimonials.map((t) => (
           <Card key={t.id}>
             <CardContent className="pt-6">
@@ -55,9 +82,13 @@ export default async function AdminTestimonialsPage() {
           </Card>
         ))}
         {testimonials.length === 0 && (
-          <p className="text-muted-foreground">No testimonials yet.</p>
+          <p className="text-muted-foreground">
+            {q ? `No testimonials match "${q}".` : "No testimonials yet."}
+          </p>
         )}
       </div>
+
+      <ListPagination currentPage={currentPage} totalPages={totalPages} searchParams={params} />
     </div>
   );
 }

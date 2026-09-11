@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Mail, Send } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -10,12 +9,12 @@ import { portalUrlFor } from "@/lib/tokens";
 import { resendPortalLink, updateApplicationStatus } from "../actions";
 import { DocumentReviewRow } from "@/components/admin/document-review-row";
 import { ProgressEventForm } from "@/components/admin/progress-event-form";
+import { ApplicationStatusBadge } from "@/components/status-badge";
+import { APPLICATION_STATUS_ORDER, applicationStatusMeta } from "@/lib/status";
 
 export const metadata = {
   title: "Application Detail",
 };
-
-const STATUS_OPTIONS = ["ONBOARDED", "DOCS_PENDING", "IN_REVIEW", "APPROVED", "COMPLETED"];
 
 export default async function ApplicationDetailPage({
   params,
@@ -108,7 +107,7 @@ export default async function ApplicationDetailPage({
               <CardTitle>Status</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3">
-              <Badge className="w-fit">{application.status.replace("_", " ")}</Badge>
+              <ApplicationStatusBadge status={application.status} className="w-fit" />
               <form action={updateApplicationStatus} className="grid gap-2">
                 <input type="hidden" name="id" value={application.id} />
                 <select
@@ -116,8 +115,8 @@ export default async function ApplicationDetailPage({
                   defaultValue={application.status}
                   className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
                 >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s.replace("_", " ")}</option>
+                  {APPLICATION_STATUS_ORDER.map((s) => (
+                    <option key={s} value={s}>{applicationStatusMeta[s].label}</option>
                   ))}
                 </select>
                 <Button type="submit" size="sm" variant="outline">Update status</Button>

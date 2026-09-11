@@ -12,13 +12,27 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import { deleteBlogPost } from "./actions";
+import { ListSearch } from "@/components/admin/list-search";
+import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
 
 export const metadata = {
   title: "Blog",
 };
 
-export default async function AdminBlogPage() {
+export default async function AdminBlogPage({ searchParams }: PageProps<"/admin/blog">) {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const page = typeof params.page === "string" ? parseInt(params.page, 10) || 1 : 1;
+
+  const where = q ? { title: { contains: q, mode: "insensitive" as const } } : undefined;
+
+  const totalCount = await prisma.blogPost.count({ where });
+  const { currentPage, totalPages, skip, take } = paginationInfo(totalCount, page);
+
   const posts = await prisma.blogPost.findMany({
+    where,
+    skip,
+    take,
     orderBy: { createdAt: "desc" },
     include: { author: { select: { name: true } } },
   });
@@ -35,7 +49,11 @@ export default async function AdminBlogPage() {
         </Button>
       </div>
 
-      <div className="mt-6 rounded-lg border">
+      <div className="mt-6">
+        <ListSearch placeholder="Search posts…" />
+      </div>
+
+      <div className="mt-4 rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -71,13 +89,15 @@ export default async function AdminBlogPage() {
             {posts.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No posts yet.
+                  {q ? `No posts match "${q}".` : "No posts yet."}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      <ListPagination currentPage={currentPage} totalPages={totalPages} searchParams={params} />
     </div>
   );
 }

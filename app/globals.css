@@ -25,6 +25,7 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-success: var(--success);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -69,11 +70,16 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Ordinal ramp (one hue, light→dark) for the application-stage chart —
+     validated with the dataviz skill's validator against this surface. */
+  --chart-1: oklch(0.76 0.075 255);
+  --chart-2: oklch(0.635 0.115 255);
+  --chart-3: oklch(0.51 0.15 255);
+  --chart-4: oklch(0.385 0.165 255);
+  --chart-5: oklch(0.26 0.12 255);
+  /* Status "good" role — fixed across light/dark per the dataviz skill's
+     status-palette rule (never themed), so it's declared once here only. */
+  --success: oklch(0.621 0.207 142.6);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -105,11 +111,11 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.76 0.1 255);
+  --chart-2: oklch(0.685 0.14 255);
+  --chart-3: oklch(0.61 0.155 255);
+  --chart-4: oklch(0.535 0.16 255);
+  --chart-5: oklch(0.46 0.15 255);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);

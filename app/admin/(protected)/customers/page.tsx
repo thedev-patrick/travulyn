@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -11,21 +10,35 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
+import { ApplicationStatusBadge } from "@/components/status-badge";
+import { ListSearch } from "@/components/admin/list-search";
+import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
 
 export const metadata = {
   title: "Customers",
 };
 
-const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  ONBOARDED: "secondary",
-  DOCS_PENDING: "outline",
-  IN_REVIEW: "default",
-  APPROVED: "default",
-  COMPLETED: "secondary",
-};
+export default async function CustomersPage({ searchParams }: PageProps<"/admin/customers">) {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const page = typeof params.page === "string" ? parseInt(params.page, 10) || 1 : 1;
 
-export default async function CustomersPage() {
+  const where = q
+    ? {
+        OR: [
+          { fullName: { contains: q, mode: "insensitive" as const } },
+          { email: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : undefined;
+
+  const totalCount = await prisma.customer.count({ where });
+  const { currentPage, totalPages, skip, take } = paginationInfo(totalCount, page);
+
   const customers = await prisma.customer.findMany({
+    where,
+    skip,
+    take,
     include: {
       applications: {
         orderBy: { createdAt: "desc" },
@@ -47,7 +60,11 @@ export default async function CustomersPage() {
         </Button>
       </div>
 
-      <div className="mt-6 rounded-lg border">
+      <div className="mt-6">
+        <ListSearch placeholder="Search by name or email…" />
+      </div>
+
+      <div className="mt-4 rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -79,7 +96,7 @@ export default async function CustomersPage() {
                   </TableCell>
                   <TableCell>
                     {latest ? (
-                      <Badge variant={statusVariant[latest.status]}>{latest.status.replace("_", " ")}</Badge>
+                      <ApplicationStatusBadge status={latest.status} />
                     ) : (
                       <span className="text-xs text-muted-foreground">No applications yet</span>
                     )}
@@ -98,13 +115,15 @@ export default async function CustomersPage() {
             {customers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  No customers yet.
+                  {q ? `No customers match "${q}".` : "No customers yet."}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      <ListPagination currentPage={currentPage} totalPages={totalPages} searchParams={params} />
     </div>
   );
 }

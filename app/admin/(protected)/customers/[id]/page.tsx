@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Mail, Phone, Plus } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,17 +12,10 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
+import { ApplicationStatusBadge } from "@/components/status-badge";
 
 export const metadata = {
   title: "Customer Profile",
-};
-
-const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  ONBOARDED: "secondary",
-  DOCS_PENDING: "outline",
-  IN_REVIEW: "default",
-  APPROVED: "default",
-  COMPLETED: "secondary",
 };
 
 export default async function CustomerProfilePage({ params }: PageProps<"/admin/customers/[id]">) {
@@ -86,7 +78,7 @@ export default async function CustomerProfilePage({ params }: PageProps<"/admin/
                       {a.destinationCountry.name}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant[a.status]}>{a.status.replace("_", " ")}</Badge>
+                      <ApplicationStatusBadge status={a.status} />
                     </TableCell>
                     <TableCell className="text-muted-foreground">{a.createdAt.toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">

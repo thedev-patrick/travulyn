@@ -11,13 +11,34 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import { deleteDocument } from "./actions";
+import { ListSearch } from "@/components/admin/list-search";
+import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
 
 export const metadata = {
   title: "Document Types",
 };
 
-export default async function DocumentsPage() {
+export default async function DocumentsPage({ searchParams }: PageProps<"/admin/documents">) {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const page = typeof params.page === "string" ? parseInt(params.page, 10) || 1 : 1;
+
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { description: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : undefined;
+
+  const totalCount = await prisma.requiredDocument.count({ where });
+  const { currentPage, totalPages, skip, take } = paginationInfo(totalCount, page);
+
   const documents = await prisma.requiredDocument.findMany({
+    where,
+    skip,
+    take,
     orderBy: { name: "asc" },
     include: { _count: { select: { corridors: true } } },
   });
@@ -36,7 +57,11 @@ export default async function DocumentsPage() {
         </Button>
       </div>
 
-      <div className="mt-6 rounded-lg border">
+      <div className="mt-6">
+        <ListSearch placeholder="Search document types…" />
+      </div>
+
+      <div className="mt-4 rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -68,13 +93,15 @@ export default async function DocumentsPage() {
             {documents.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No document types yet.
+                  {q ? `No document types match "${q}".` : "No document types yet."}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      <ListPagination currentPage={currentPage} totalPages={totalPages} searchParams={params} />
     </div>
   );
 }
