@@ -6,6 +6,10 @@ import { marked } from "marked";
 import { getBlogPostBySlug } from "@/lib/queries";
 import { Reveal } from "@/components/motion/reveal";
 
+// Posts are published live via the admin CMS, so this page must render
+// per-request rather than being cached from build time.
+export const dynamic = "force-dynamic";
+
 export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);

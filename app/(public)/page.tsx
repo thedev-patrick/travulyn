@@ -8,6 +8,10 @@ import { TiltCard } from "@/components/motion/tilt-card";
 import { ParallaxBlobs } from "@/components/site/parallax-blobs";
 import { FlightPath } from "@/components/site/flight-path";
 
+// Content (blog posts, testimonials) is managed live via the admin CMS, so this
+// page must render per-request rather than being cached from build time.
+export const dynamic = "force-dynamic";
+
 const features = [
   {
     icon: FileCheck2,

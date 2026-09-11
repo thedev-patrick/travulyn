@@ -5,6 +5,10 @@ import { getPublishedBlogPosts } from "@/lib/queries";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { TiltCard } from "@/components/motion/tilt-card";
 
+// Posts are published live via the admin CMS, so this page must render
+// per-request rather than being cached from build time.
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Blog",
 };
