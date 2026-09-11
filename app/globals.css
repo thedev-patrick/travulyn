@@ -161,6 +161,11 @@
   100% { background-position: -200% 0; }
 }
 
+@keyframes how-it-works-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
