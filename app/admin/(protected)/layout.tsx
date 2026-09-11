@@ -3,6 +3,7 @@ import { Plane } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { SidebarNav } from "@/components/admin/sidebar-nav";
 import { SignOutButton } from "@/components/admin/sign-out-button";
+import { CurrencySwitcher } from "@/components/site/currency-switcher";
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   const session = await auth();
@@ -27,7 +28,13 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
       <div className="flex flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b px-4 md:hidden">
           <Link href="/admin/dashboard" className="font-semibold">Travulyn Admin</Link>
-          <SignOutButton />
+          <div className="flex items-center gap-2">
+            <CurrencySwitcher />
+            <SignOutButton />
+          </div>
+        </header>
+        <header className="hidden h-14 items-center justify-end border-b px-6 md:flex">
+          <CurrencySwitcher />
         </header>
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>

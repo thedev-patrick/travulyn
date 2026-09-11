@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowRight, CheckCircle2, CircleDashed, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { getCorridor, getCountries } from "@/lib/queries";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { CountrySelect } from "@/components/site/country-select";
+import {
+  CURRENCY_COOKIE,
+  DEFAULT_CURRENCY,
+  isSupportedCurrency,
+  getExchangeRates,
+  convertAmount,
+  formatCurrency,
+} from "@/lib/currency";
 
 export const metadata = {
   title: "Check Requirements & Pricing",
@@ -20,6 +29,38 @@ export default async function DestinationsPage({
 
   const countries = await getCountries();
   const corridor = origin && destination ? await getCorridor(origin, destination) : null;
+
+  const cookieStore = await cookies();
+  const preferredCurrency = cookieStore.get(CURRENCY_COOKIE)?.value;
+  const displayCurrency = isSupportedCurrency(preferredCurrency) ? preferredCurrency : DEFAULT_CURRENCY;
+
+  let priceMinDisplay = "";
+  let priceMaxDisplay = "";
+  let conversionNote: string | null = null;
+
+  if (corridor) {
+    const min = Number(corridor.priceEstimateMin);
+    const max = Number(corridor.priceEstimateMax);
+
+    if (displayCurrency === corridor.currency) {
+      priceMinDisplay = formatCurrency(min, corridor.currency);
+      priceMaxDisplay = formatCurrency(max, corridor.currency);
+    } else {
+      const rates = await getExchangeRates();
+      const convertedMin = rates ? convertAmount(min, corridor.currency, displayCurrency, rates) : null;
+      const convertedMax = rates ? convertAmount(max, corridor.currency, displayCurrency, rates) : null;
+
+      if (convertedMin !== null && convertedMax !== null) {
+        priceMinDisplay = formatCurrency(convertedMin, displayCurrency);
+        priceMaxDisplay = formatCurrency(convertedMax, displayCurrency);
+        conversionNote = `Converted from ${corridor.currency}, for reference only`;
+      } else {
+        priceMinDisplay = formatCurrency(min, corridor.currency);
+        priceMaxDisplay = formatCurrency(max, corridor.currency);
+        conversionNote = "Live exchange rates are unavailable right now — showing the original currency";
+      }
+    }
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
@@ -80,11 +121,14 @@ export default async function DestinationsPage({
                       {corridor.destinationCountry.name}
                     </p>
                     <p className="mt-2 font-heading text-3xl font-medium">
-                      {corridor.currency} {Number(corridor.priceEstimateMin).toLocaleString()}
+                      {priceMinDisplay}
                       <span className="text-muted-foreground"> – </span>
-                      {Number(corridor.priceEstimateMax).toLocaleString()}
+                      {priceMaxDisplay}
                     </p>
-                    <p className="text-sm text-muted-foreground">Estimated price, service fees included</p>
+                    <p className="text-sm text-muted-foreground">
+                      Estimated price, service fees included
+                      {conversionNote && <> · {conversionNote}</>}
+                    </p>
                   </div>
                   <Badge variant="secondary" className="gap-1.5">
                     <Clock3 className="h-3 w-3" /> {corridor.processingDays} day processing

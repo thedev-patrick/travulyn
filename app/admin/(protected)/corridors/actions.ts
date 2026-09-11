@@ -4,13 +4,16 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency";
+
+const currencyCodes = SUPPORTED_CURRENCIES.map((c) => c.code) as [string, ...string[]];
 
 const corridorSchema = z.object({
   originCountryId: z.string().min(1, "Select an origin country"),
   destinationCountryId: z.string().min(1, "Select a destination country"),
   priceEstimateMin: z.coerce.number().nonnegative(),
   priceEstimateMax: z.coerce.number().nonnegative(),
-  currency: z.string().trim().min(1).max(10),
+  currency: z.enum(currencyCodes, { message: "Select a supported currency" }),
   processingDays: z.coerce.number().int().nonnegative(),
   summary: z.string().trim().optional(),
 });

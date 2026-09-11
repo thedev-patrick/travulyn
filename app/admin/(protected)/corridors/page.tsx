@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,14 @@ import { deleteCorridor } from "./actions";
 import { ListSearch } from "@/components/admin/list-search";
 import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
 import { DeleteConfirmDialog } from "@/components/admin/delete-confirm-dialog";
+import {
+  CURRENCY_COOKIE,
+  DEFAULT_CURRENCY,
+  isSupportedCurrency,
+  getExchangeRates,
+  convertAmount,
+  formatCurrency,
+} from "@/lib/currency";
 
 export const metadata = {
   title: "Corridors & Pricing",
@@ -42,6 +51,25 @@ export default async function CorridorsPage({ searchParams }: PageProps<"/admin/
     take,
     include: { originCountry: true, destinationCountry: true, _count: { select: { documents: true } } },
     orderBy: { createdAt: "desc" },
+  });
+
+  const cookieStore = await cookies();
+  const preferredCurrency = cookieStore.get(CURRENCY_COOKIE)?.value;
+  const displayCurrency = isSupportedCurrency(preferredCurrency) ? preferredCurrency : DEFAULT_CURRENCY;
+
+  const needsConversion = corridors.some((c) => c.currency !== displayCurrency);
+  const rates = needsConversion ? await getExchangeRates() : null;
+
+  const rows = corridors.map((c) => {
+    let convertedLabel: string | null = null;
+    if (c.currency !== displayCurrency && rates) {
+      const min = convertAmount(Number(c.priceEstimateMin), c.currency, displayCurrency, rates);
+      const max = convertAmount(Number(c.priceEstimateMax), c.currency, displayCurrency, rates);
+      if (min !== null && max !== null) {
+        convertedLabel = `≈ ${formatCurrency(min, displayCurrency)}–${formatCurrency(max, displayCurrency)}`;
+      }
+    }
+    return { ...c, convertedLabel };
   });
 
   return (
@@ -74,13 +102,18 @@ export default async function CorridorsPage({ searchParams }: PageProps<"/admin/
             </TableRow>
           </TableHeader>
           <TableBody>
-            {corridors.map((c) => (
+            {rows.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-medium">
                   {c.originCountry.flagEmoji} {c.originCountry.name} → {c.destinationCountry.flagEmoji} {c.destinationCountry.name}
                 </TableCell>
                 <TableCell>
-                  {c.currency} {Number(c.priceEstimateMin).toLocaleString()}–{Number(c.priceEstimateMax).toLocaleString()}
+                  <p>
+                    {c.currency} {Number(c.priceEstimateMin).toLocaleString()}–{Number(c.priceEstimateMax).toLocaleString()}
+                  </p>
+                  {c.convertedLabel && (
+                    <p className="text-xs text-muted-foreground">{c.convertedLabel}</p>
+                  )}
                 </TableCell>
                 <TableCell>{c.processingDays} days</TableCell>
                 <TableCell>{c._count.documents}</TableCell>

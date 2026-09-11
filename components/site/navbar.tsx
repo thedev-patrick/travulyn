@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CurrencySwitcher } from "@/components/site/currency-switcher";
 
 const links = [
   { href: "/destinations", label: "Check Requirements" },
@@ -66,6 +67,7 @@ export function Navbar() {
           })}
         </nav>
         <div className="flex items-center gap-2">
+          <CurrencySwitcher />
           <Button
             variant="ghost"
             size="sm"

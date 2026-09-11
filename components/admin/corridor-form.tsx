@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { saveCorridor, type CorridorFormState } from "@/app/admin/(protected)/corridors/actions";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency";
 
 type Country = { id: string; name: string; flagEmoji: string | null };
 type RequiredDocument = { id: string; name: string };
@@ -110,7 +111,18 @@ export function CorridorForm({
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="currency">Currency</Label>
-          <Input id="currency" name="currency" defaultValue={corridor?.currency ?? "USD"} required />
+          <Select name="currency" defaultValue={corridor?.currency ?? "USD"}>
+            <SelectTrigger id="currency" className="w-full">
+              <SelectValue>{(value: string) => value}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  {c.code} — {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="processingDays">Processing days</Label>
