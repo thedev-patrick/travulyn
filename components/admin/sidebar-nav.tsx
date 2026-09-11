@@ -10,11 +10,13 @@ import {
   Newspaper,
   Quote,
   Mail,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/countries", label: "Countries", icon: Globe },
   { href: "/admin/corridors", label: "Corridors & Pricing", icon: Route },
   { href: "/admin/documents", label: "Document Types", icon: FileText },
   { href: "/admin/customers", label: "Customers", icon: Users },

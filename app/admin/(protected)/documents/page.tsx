@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteDocument } from "./actions";
 import { ListSearch } from "@/components/admin/list-search";
 import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
+import { DeleteConfirmDialog } from "@/components/admin/delete-confirm-dialog";
 
 export const metadata = {
   title: "Document Types",
@@ -81,12 +82,12 @@ export default async function DocumentsPage({ searchParams }: PageProps<"/admin/
                   <Button variant="outline" size="sm" render={<Link href={`/admin/documents/${d.id}`} />}>
                     Edit
                   </Button>
-                  <form action={deleteDocument}>
-                    <input type="hidden" name="id" value={d.id} />
-                    <Button variant="ghost" size="icon-sm" type="submit">
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </form>
+                  <DeleteConfirmDialog
+                    title="Delete this document type?"
+                    description={`"${d.name}" will be permanently removed. This fails if any application is tracking it.`}
+                    action={deleteDocument}
+                    hiddenFields={{ id: d.id }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

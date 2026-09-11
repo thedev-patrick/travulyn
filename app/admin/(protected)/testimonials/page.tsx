@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Star, Trash2 } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteTestimonial } from "./actions";
 import { ListSearch } from "@/components/admin/list-search";
 import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
+import { DeleteConfirmDialog } from "@/components/admin/delete-confirm-dialog";
 
 export const metadata = {
   title: "Testimonials",
@@ -71,12 +72,12 @@ export default async function AdminTestimonialsPage({ searchParams }: PageProps<
                 <Button variant="outline" size="sm" render={<Link href={`/admin/testimonials/${t.id}`} />}>
                   Edit
                 </Button>
-                <form action={deleteTestimonial}>
-                  <input type="hidden" name="id" value={t.id} />
-                  <Button variant="ghost" size="icon-sm" type="submit">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </form>
+                <DeleteConfirmDialog
+                  title="Delete this testimonial?"
+                  description={`The quote from ${t.customerName} will be permanently removed from the landing page.`}
+                  action={deleteTestimonial}
+                  hiddenFields={{ id: t.id }}
+                />
               </div>
             </CardContent>
           </Card>

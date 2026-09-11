@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteCorridor } from "./actions";
 import { ListSearch } from "@/components/admin/list-search";
 import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
+import { DeleteConfirmDialog } from "@/components/admin/delete-confirm-dialog";
 
 export const metadata = {
   title: "Corridors & Pricing",
@@ -87,12 +88,12 @@ export default async function CorridorsPage({ searchParams }: PageProps<"/admin/
                   <Button variant="outline" size="sm" render={<Link href={`/admin/corridors/${c.id}`} />}>
                     Edit
                   </Button>
-                  <form action={deleteCorridor}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <Button variant="ghost" size="icon-sm" type="submit">
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </form>
+                  <DeleteConfirmDialog
+                    title="Delete this corridor?"
+                    description={`${c.originCountry.name} → ${c.destinationCountry.name} and its document requirements will be permanently removed. This fails if any applications use it.`}
+                    action={deleteCorridor}
+                    hiddenFields={{ id: c.id }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

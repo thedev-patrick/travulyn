@@ -5,6 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { CountrySelect } from "@/components/site/country-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { saveCorridor, type CorridorFormState } from "@/app/admin/(protected)/corridors/actions";
 
 type Country = { id: string; name: string; flagEmoji: string | null };
@@ -13,6 +21,12 @@ type RequiredDocument = { id: string; name: string };
 type ExistingDoc = { requiredDocumentId: string; isMandatory: boolean };
 
 const initialState: CorridorFormState = { status: "idle" };
+
+const docRequirementLabel: Record<string, string> = {
+  none: "Not required",
+  required: "Required",
+  optional: "Optional",
+};
 
 export function CorridorForm({
   countries,
@@ -49,33 +63,23 @@ export function CorridorForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <Label htmlFor="originCountryId">Origin country</Label>
-          <select
+          <CountrySelect
             id="originCountryId"
             name="originCountryId"
-            defaultValue={corridor?.originCountryId ?? ""}
+            countries={countries}
+            defaultValue={corridor?.originCountryId}
             required
-            className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="" disabled>Select a country</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>{c.flagEmoji} {c.name}</option>
-            ))}
-          </select>
+          />
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="destinationCountryId">Destination country</Label>
-          <select
+          <CountrySelect
             id="destinationCountryId"
             name="destinationCountryId"
-            defaultValue={corridor?.destinationCountryId ?? ""}
+            countries={countries}
+            defaultValue={corridor?.destinationCountryId}
             required
-            className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="" disabled>Select a country</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>{c.flagEmoji} {c.name}</option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
@@ -132,15 +136,18 @@ export function CorridorForm({
           {documents.map((doc) => (
             <div key={doc.id} className="flex items-center justify-between gap-4 p-3">
               <span className="text-sm">{doc.name}</span>
-              <select
-                name={`doc_${doc.id}`}
-                defaultValue={docStatus(doc.id)}
-                className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm"
-              >
-                <option value="none">Not required</option>
-                <option value="required">Required</option>
-                <option value="optional">Optional</option>
-              </select>
+              <Select name={`doc_${doc.id}`} defaultValue={docStatus(doc.id)}>
+                <SelectTrigger size="sm" className="w-36">
+                  <SelectValue>
+                    {(value: string) => docRequirementLabel[value] ?? "Not required"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Not required</SelectItem>
+                  <SelectItem value="required">Required</SelectItem>
+                  <SelectItem value="optional">Optional</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           ))}
           {documents.length === 0 && (

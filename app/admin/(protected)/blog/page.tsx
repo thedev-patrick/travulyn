@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteBlogPost } from "./actions";
 import { ListSearch } from "@/components/admin/list-search";
 import { ListPagination, paginationInfo } from "@/components/admin/list-pagination";
+import { DeleteConfirmDialog } from "@/components/admin/delete-confirm-dialog";
 
 export const metadata = {
   title: "Blog",
@@ -77,12 +78,12 @@ export default async function AdminBlogPage({ searchParams }: PageProps<"/admin/
                   <Button variant="outline" size="sm" render={<Link href={`/admin/blog/${p.id}`} />}>
                     Edit
                   </Button>
-                  <form action={deleteBlogPost}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <Button variant="ghost" size="icon-sm" type="submit">
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </form>
+                  <DeleteConfirmDialog
+                    title="Delete this post?"
+                    description={`"${p.title}" will be permanently removed and unpublished from the blog.`}
+                    action={deleteBlogPost}
+                    hiddenFields={{ id: p.id }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

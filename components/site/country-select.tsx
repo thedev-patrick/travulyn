@@ -16,15 +16,17 @@ export function CountrySelect({
   countries,
   defaultValue,
   placeholder = "Select a country",
+  required,
 }: {
   name: string;
   id: string;
   countries: CountryOption[];
   defaultValue?: string;
   placeholder?: string;
+  required?: boolean;
 }) {
   return (
-    <Select name={name} defaultValue={defaultValue}>
+    <Select name={name} defaultValue={defaultValue} required={required}>
       <SelectTrigger id={id} className="w-full">
         <SelectValue placeholder={placeholder}>
           {(value: string | null) => {

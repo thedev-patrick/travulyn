@@ -10,7 +10,7 @@ import { resendPortalLink, updateApplicationStatus } from "../actions";
 import { DocumentReviewRow } from "@/components/admin/document-review-row";
 import { ProgressEventForm } from "@/components/admin/progress-event-form";
 import { ApplicationStatusBadge } from "@/components/status-badge";
-import { APPLICATION_STATUS_ORDER, applicationStatusMeta } from "@/lib/status";
+import { StatusUpdateForm } from "@/components/admin/status-update-form";
 
 export const metadata = {
   title: "Application Detail",
@@ -108,19 +108,11 @@ export default async function ApplicationDetailPage({
             </CardHeader>
             <CardContent className="grid gap-3">
               <ApplicationStatusBadge status={application.status} className="w-fit" />
-              <form action={updateApplicationStatus} className="grid gap-2">
-                <input type="hidden" name="id" value={application.id} />
-                <select
-                  name="status"
-                  defaultValue={application.status}
-                  className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-                >
-                  {APPLICATION_STATUS_ORDER.map((s) => (
-                    <option key={s} value={s}>{applicationStatusMeta[s].label}</option>
-                  ))}
-                </select>
-                <Button type="submit" size="sm" variant="outline">Update status</Button>
-              </form>
+              <StatusUpdateForm
+                applicationId={application.id}
+                currentStatus={application.status}
+                action={updateApplicationStatus}
+              />
             </CardContent>
           </Card>
 

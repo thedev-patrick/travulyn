@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { CountrySelect } from "@/components/site/country-select";
 import {
   createApplicationAction,
   type NewApplicationFormState,
@@ -23,34 +25,12 @@ export function NewApplicationForm({
       <input type="hidden" name="customerId" value={customerId} />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
-          <label className="text-sm font-medium" htmlFor="originCountryId">Travelling from</label>
-          <select
-            id="originCountryId"
-            name="originCountryId"
-            required
-            defaultValue=""
-            className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="" disabled>Select a country</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>{c.flagEmoji} {c.name}</option>
-            ))}
-          </select>
+          <Label htmlFor="originCountryId">Travelling from</Label>
+          <CountrySelect id="originCountryId" name="originCountryId" countries={countries} required />
         </div>
         <div className="grid gap-1.5">
-          <label className="text-sm font-medium" htmlFor="destinationCountryId">Travelling to</label>
-          <select
-            id="destinationCountryId"
-            name="destinationCountryId"
-            required
-            defaultValue=""
-            className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="" disabled>Select a country</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>{c.flagEmoji} {c.name}</option>
-            ))}
-          </select>
+          <Label htmlFor="destinationCountryId">Travelling to</Label>
+          <CountrySelect id="destinationCountryId" name="destinationCountryId" countries={countries} required />
         </div>
       </div>
       {state.status === "error" && <p className="text-sm text-destructive">{state.message}</p>}

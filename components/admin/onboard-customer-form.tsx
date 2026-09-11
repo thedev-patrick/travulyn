@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { CountrySelect } from "@/components/site/country-select";
 import { onboardCustomer, type OnboardFormState } from "@/app/admin/(protected)/customers/actions";
 
 const initialState: OnboardFormState = { status: "idle" };
@@ -34,33 +35,11 @@ export function OnboardCustomerForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <Label htmlFor="originCountryId">Travelling from</Label>
-          <select
-            id="originCountryId"
-            name="originCountryId"
-            required
-            defaultValue=""
-            className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="" disabled>Select a country</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>{c.flagEmoji} {c.name}</option>
-            ))}
-          </select>
+          <CountrySelect id="originCountryId" name="originCountryId" countries={countries} required />
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="destinationCountryId">Travelling to</Label>
-          <select
-            id="destinationCountryId"
-            name="destinationCountryId"
-            required
-            defaultValue=""
-            className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="" disabled>Select a country</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>{c.flagEmoji} {c.name}</option>
-            ))}
-          </select>
+          <CountrySelect id="destinationCountryId" name="destinationCountryId" countries={countries} required />
         </div>
       </div>
       {state.status === "error" && <p className="text-sm text-destructive">{state.message}</p>}
