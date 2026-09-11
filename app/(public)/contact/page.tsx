@@ -2,6 +2,11 @@ import { ContactForm } from "@/components/site/contact-form";
 import { getCountries } from "@/lib/queries";
 import { Reveal } from "@/components/motion/reveal";
 
+// Queries the database (country list) at request time rather than caching a
+// build-time snapshot — consistent with the other public pages, and avoids
+// requiring a fully-migrated database just to produce a build.
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Contact Us",
 };
